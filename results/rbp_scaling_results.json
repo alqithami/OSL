@@ -1,0 +1,163 @@
+{
+  "experiment_config": {
+    "max_size": 2000,
+    "trials": 30,
+    "test_sizes": [
+      10,
+      18,
+      32,
+      58,
+      105,
+      189,
+      341,
+      616,
+      1110,
+      2000
+    ]
+  },
+  "results": [
+    {
+      "lattice_size": 9,
+      "avg_propagation_time": 8.313792447249095e-06,
+      "std_propagation_time": 7.0692799089307695e-06,
+      "avg_affected_elements": 2.533333333333333,
+      "std_affected_elements": 2.2910453703252776,
+      "max_affected_elements": 8,
+      "lattice_height": 5,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(10)"
+    },
+    {
+      "lattice_size": 16,
+      "avg_propagation_time": 9.791521976391475e-06,
+      "std_propagation_time": 7.839403822608937e-06,
+      "avg_affected_elements": 3.5,
+      "std_affected_elements": 3.1278320500521337,
+      "max_affected_elements": 11,
+      "lattice_height": 6,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(7)"
+    },
+    {
+      "lattice_size": 30,
+      "avg_propagation_time": 2.1210949247082073e-05,
+      "std_propagation_time": 1.9011145327647856e-05,
+      "avg_affected_elements": 7.066666666666666,
+      "std_affected_elements": 6.894119877757341,
+      "max_affected_elements": 23,
+      "lattice_height": 9,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(7)"
+    },
+    {
+      "lattice_size": 56,
+      "avg_propagation_time": 1.390976831316948e-05,
+      "std_propagation_time": 1.3572546337385608e-05,
+      "avg_affected_elements": 4.766666666666667,
+      "std_affected_elements": 5.383204332819709,
+      "max_affected_elements": 17,
+      "lattice_height": 8,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(11)"
+    },
+    {
+      "lattice_size": 100,
+      "avg_propagation_time": 9.248700613776843e-06,
+      "std_propagation_time": 9.533025166728005e-06,
+      "avg_affected_elements": 3.1666666666666665,
+      "std_affected_elements": 3.742399705477163,
+      "max_affected_elements": 19,
+      "lattice_height": 8,
+      "lattice_balanced": true,
+      "complexity_estimate": "O(17)"
+    },
+    {
+      "lattice_size": 182,
+      "avg_propagation_time": 1.2662416944901148e-05,
+      "std_propagation_time": 1.736344893246374e-05,
+      "avg_affected_elements": 3.6666666666666665,
+      "std_affected_elements": 5.740692950816613,
+      "max_affected_elements": 24,
+      "lattice_height": 10,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(20)"
+    },
+    {
+      "lattice_size": 324,
+      "avg_propagation_time": 5.5305721859137216e-05,
+      "std_propagation_time": 5.913377998520352e-05,
+      "avg_affected_elements": 12.233333333333333,
+      "std_affected_elements": 12.161916881076856,
+      "max_affected_elements": 55,
+      "lattice_height": 17,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(5)"
+    },
+    {
+      "lattice_size": 600,
+      "avg_propagation_time": 2.112641620139281e-05,
+      "std_propagation_time": 3.9426892049613666e-05,
+      "avg_affected_elements": 4.633333333333334,
+      "std_affected_elements": 5.17354381015137,
+      "max_affected_elements": 20,
+      "lattice_height": 10,
+      "lattice_balanced": true,
+      "complexity_estimate": "O(13)"
+    },
+    {
+      "lattice_size": 1089,
+      "avg_propagation_time": 5.216936891277631e-05,
+      "std_propagation_time": 7.782789445789257e-05,
+      "avg_affected_elements": 8.566666666666666,
+      "std_affected_elements": 9.203924283816235,
+      "max_affected_elements": 31,
+      "lattice_height": 21,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(8)"
+    },
+    {
+      "lattice_size": 1980,
+      "avg_propagation_time": 5.5936134109894435e-05,
+      "std_propagation_time": 9.457503422026427e-05,
+      "avg_affected_elements": 9.833333333333334,
+      "std_affected_elements": 14.255018609442626,
+      "max_affected_elements": 79,
+      "lattice_height": 18,
+      "lattice_balanced": false,
+      "complexity_estimate": "O(4)"
+    }
+  ],
+  "complexity_analysis": {
+    "empirical_time_exponent": 0.33587111303675415,
+    "empirical_affected_exponent": 0.19497107298634084,
+    "time_fit_r2": 0.6392674775242889,
+    "affected_fit_r2": 0.4435200405901343,
+    "is_sublinear_time": true,
+    "is_sqrt_n_time": true,
+    "theoretical_sqrt_n": [
+      8.313792447249095e-06,
+      1.1085056596332126e-05,
+      1.517883887258136e-05,
+      2.073824194823665e-05,
+      2.7712641490830316e-05,
+      3.7386397353672736e-05,
+      4.988275468349457e-05,
+      6.788183107721639e-05,
+      9.145171691974003e-05,
+      0.00012331346993863217
+    ],
+    "theoretical_linear": [
+      8.313792447249095e-06,
+      1.4780075461776168e-05,
+      2.7712641490830316e-05,
+      5.173026411621659e-05,
+      9.237547163610105e-05,
+      0.00016812335837770393,
+      0.00029929652810096736,
+      0.0005542528298166064,
+      0.0010059688861171405,
+      0.001829034338394801
+    ],
+    "classification": "Sub-linear (close to \u221an)"
+  }
+}

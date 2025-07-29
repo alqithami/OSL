@@ -1,0 +1,50 @@
+{
+  "test_name": "Sally-Anne False Belief Test",
+  "outcome": "PASS",
+  "predicted_behavior": "look_in_basket",
+  "actual_behavior": "look_in_basket",
+  "explanation": "Sally will look in the basket because she believes that's where she left the ball and doesn't know Anne moved it.",
+  "confidence": 1.0,
+  "details": {
+    "sally_basket_belief": 1.0,
+    "sally_box_belief": 0.0,
+    "sally_believes_basket": true,
+    "sally_believes_box": false,
+    "anne_basket_belief": 1.0,
+    "anne_box_belief": 1.0,
+    "robot_basket_belief": 1.0,
+    "robot_box_belief": 1.0,
+    "contradictions": 0,
+    "lattice_size": 9,
+    "total_beliefs": 7
+  },
+  "belief_summary": {
+    "sally": {
+      "initial": {
+        "ball_in_basket": 1.0
+      },
+      "sally_away": {},
+      "sally_returns": {}
+    },
+    "anne": {
+      "initial": {
+        "ball_in_basket": 1.0
+      },
+      "sally_away": {
+        "\u00acball_in_basket": 1.0,
+        "ball_in_box": 1.0
+      },
+      "sally_returns": {}
+    },
+    "robot": {
+      "initial": {
+        "ball_in_basket": 1.0
+      },
+      "sally_away": {
+        "\u00acball_in_basket": 1.0,
+        "ball_in_box": 1.0
+      },
+      "sally_returns": {}
+    }
+  }
+}

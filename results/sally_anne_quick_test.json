@@ -1,0 +1,7 @@
+{
+  "test_name": "Sally-Anne False Belief Test",
+  "outcome": "PASS",
+  "predicted_behavior": "look_in_basket",
+  "confidence": 1.0,
+  "explanation": "Sally will look in the basket because she believes that's where she left the ball and doesn't know Anne moved it."
+}

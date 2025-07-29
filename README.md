@@ -1,6 +1,6 @@
 # Observer-Situation Lattice (OSL) 
 
-**Anonymous Submission to AAAI 2026**
+**Anonymous Submission to AAAI 2026 #1286**
 
 This repository contains the implementation and validation of the Observer-Situation Lattice (OSL) framework described in our AAAI submission \#1286	
 . All code, data, and results are provided to support reproducible research and peer review.

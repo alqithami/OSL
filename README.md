@@ -6,8 +6,6 @@ This repository contains the reference implementation and experimental artifacts
 In: *Proceedings of the 25th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2026)*, Paphos, Cyprus (May 25–29, 2026).  
 DOI: **10.65109/CHZG9392**
 
-A copy of the paper PDF is included at `paper/AAMAS_26__OSL.pdf`.
-
 ---
 
 ## What is OSL?

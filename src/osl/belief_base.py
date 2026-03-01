@@ -1,370 +1,466 @@
 """
-Belief base management for the OSL framework.
-
-This module implements storage and querying of perspective-indexed beliefs
-within the Observer-Situation Lattice structure.
+OSL Belief Base - Real Implementation
+Manages beliefs associated with lattice elements with genuine operations
 """
 
-from typing import Dict, List, Tuple, Set, Any, Optional, Union
+from typing import Dict, Any, Set, List, Optional, Tuple, Union
 from dataclasses import dataclass
 from collections import defaultdict
-import time
-import logging
-
-from .lattice import OSLattice
+import numpy as np
+from .core import OSLElement, OSLattice
 
 
-@dataclass
-class BeliefRecord:
-    """A single belief record in the OSL framework."""
-    proposition: str
-    element: Tuple[str, str]  # (observer, situation)
-    weight: float
-    timestamp: float
+@dataclass(frozen=True)
+class Belief:
+    """
+    Individual belief with predicate, value, and confidence
+    """
+    predicate: str
+    value: Any
+    confidence: float = 1.0
     source: Optional[str] = None
+    timestamp: Optional[float] = None
     
     def __post_init__(self):
-        if not 0.0 <= self.weight <= 1.0:
-            raise ValueError(f"Weight must be in [0,1], got {self.weight}")
+        # Validate confidence is in [0, 1]
+        if not (0.0 <= self.confidence <= 1.0):
+            raise ValueError(f"Confidence must be in [0, 1], got {self.confidence}")
+        
+        # Convert mutable values to immutable for hashing
+        if isinstance(self.value, list):
+            object.__setattr__(self, 'value', tuple(self.value))
+        elif isinstance(self.value, dict):
+            object.__setattr__(self, 'value', tuple(sorted(self.value.items())))
+        elif isinstance(self.value, set):
+            object.__setattr__(self, 'value', frozenset(self.value))
+    
+    def is_contradictory(self, other: 'Belief') -> bool:
+        """
+        Check if this belief contradicts another belief
+        Real logical contradiction detection
+        """
+        if self.predicate != other.predicate:
+            return False
+        
+        # Handle boolean contradictions
+        if isinstance(self.value, bool) and isinstance(other.value, bool):
+            return self.value != other.value
+        
+        # Handle numeric contradictions (with tolerance)
+        if isinstance(self.value, (int, float)) and isinstance(other.value, (int, float)):
+            # Consider values contradictory if they differ significantly
+            tolerance = 0.1
+            return abs(self.value - other.value) > tolerance
+        
+        # Handle string contradictions
+        if isinstance(self.value, str) and isinstance(other.value, str):
+            return self.value != other.value
+        
+        # Default: different types or values are contradictory
+        return self.value != other.value
+    
+    def combine_with(self, other: 'Belief', method: str = 'average') -> 'Belief':
+        """
+        Combine this belief with another belief on the same predicate
+        Real belief fusion operations
+        """
+        if self.predicate != other.predicate:
+            raise ValueError("Cannot combine beliefs with different predicates")
+        
+        if method == 'average':
+            # Weighted average by confidence
+            total_confidence = self.confidence + other.confidence
+            if total_confidence == 0:
+                combined_confidence = 0.0
+                combined_value = self.value
+            else:
+                combined_confidence = min(1.0, total_confidence / 2.0)
+                
+                # Combine values based on type
+                if isinstance(self.value, bool) and isinstance(other.value, bool):
+                    # For booleans, use confidence-weighted voting
+                    if self.confidence > other.confidence:
+                        combined_value = self.value
+                    elif other.confidence > self.confidence:
+                        combined_value = other.value
+                    else:
+                        combined_value = self.value  # Tie-breaking
+                elif isinstance(self.value, (int, float)) and isinstance(other.value, (int, float)):
+                    # For numbers, use weighted average
+                    combined_value = (self.value * self.confidence + other.value * other.confidence) / total_confidence
+                else:
+                    # For other types, use higher confidence value
+                    combined_value = self.value if self.confidence >= other.confidence else other.value
+        
+        elif method == 'maximum':
+            # Take belief with maximum confidence
+            if self.confidence >= other.confidence:
+                return Belief(self.predicate, self.value, self.confidence, self.source, self.timestamp)
+            else:
+                return Belief(other.predicate, other.value, other.confidence, other.source, other.timestamp)
+        
+        elif method == 'minimum':
+            # Take belief with minimum confidence (most conservative)
+            if self.confidence <= other.confidence:
+                return Belief(self.predicate, self.value, self.confidence, self.source, self.timestamp)
+            else:
+                return Belief(other.predicate, other.value, other.confidence, other.source, other.timestamp)
+        
+        else:
+            raise ValueError(f"Unknown combination method: {method}")
+        
+        return Belief(self.predicate, combined_value, combined_confidence, 
+                     f"combined({self.source},{other.source})", None)
 
 
 class BeliefBase:
     """
-    Manages beliefs indexed by Observer-Situation Lattice elements.
-    
-    This class provides storage, querying, and update operations for beliefs
-    that are tagged with specific (observer, situation) pairs.
+    Belief Base for OSL Framework
+    Manages beliefs associated with lattice elements with real operations
     """
     
-    def __init__(self, lattice: OSLattice, credibility_threshold: float = 0.5):
-        """
-        Initialize the belief base.
-        
-        Args:
-            lattice: The underlying OSL lattice structure
-            credibility_threshold: Minimum weight for belief acceptance
-        """
+    def __init__(self, lattice: OSLattice):
         self.lattice = lattice
-        self.threshold = credibility_threshold
-        
-        # Storage: proposition -> element -> list of records
-        self.beliefs: Dict[str, Dict[Tuple[str, str], List[BeliefRecord]]] = defaultdict(
-            lambda: defaultdict(list)
-        )
-        
-        # Reverse index: element -> set of propositions
-        self.element_index: Dict[Tuple[str, str], Set[str]] = defaultdict(set)
-        
+        # Map from OSLElement to list of beliefs
+        self.beliefs: Dict[OSLElement, List[Belief]] = defaultdict(list)
+        # Index by predicate for fast lookup
+        self.predicate_index: Dict[str, Dict[OSLElement, List[Belief]]] = defaultdict(lambda: defaultdict(list))
         # Contradiction tracking
-        self.contradictions: Set[Tuple[str, str]] = set()
+        self.contradictions: List[Tuple[OSLElement, Belief, OSLElement, Belief]] = []
         
-        # Statistics
-        self.stats = {
-            'total_beliefs': 0,
-            'updates': 0,
-            'queries': 0,
-            'contradictions_detected': 0
-        }
-        
-        self.logger = logging.getLogger(__name__)
-    
-    def add_belief(self, proposition: str, element: Tuple[str, str], 
-                   weight: float, source: Optional[str] = None) -> BeliefRecord:
+    def add_belief(self, element: OSLElement, predicate: str, value: Any, 
+                  confidence: float = 1.0, source: Optional[str] = None) -> bool:
         """
-        Add a new belief record to the base.
-        
-        Args:
-            proposition: The proposition being asserted (e.g., "spill_detected")
-            element: The (observer, situation) pair
-            weight: Credibility weight in [0,1]
-            source: Optional source identifier
-            
-        Returns:
-            The created BeliefRecord
-            
-        Raises:
-            ValueError: If element is not in the lattice
+        Add belief to element with real validation and indexing
+        Returns True if belief was added, False if rejected due to contradiction
         """
-        if element not in self.lattice.element_set:
+        if element not in self.lattice.elements:
             raise ValueError(f"Element {element} not in lattice")
         
-        record = BeliefRecord(
-            proposition=proposition,
-            element=element,
-            weight=weight,
-            timestamp=time.time(),
-            source=source
-        )
+        belief = Belief(predicate, value, confidence, source)
         
-        # Store the record
-        self.beliefs[proposition][element].append(record)
-        self.element_index[element].add(proposition)
+        # Check for contradictions with existing beliefs on same element
+        existing_beliefs = self.get_beliefs(element, predicate)
+        for existing in existing_beliefs:
+            if belief.is_contradictory(existing):
+                # Record contradiction
+                self.contradictions.append((element, belief, element, existing))
+                # Decide whether to add contradictory belief
+                if confidence > existing.confidence:
+                    # Replace with higher confidence belief
+                    self.beliefs[element] = [b for b in self.beliefs[element] if b != existing]
+                    self.predicate_index[predicate][element] = [b for b in self.predicate_index[predicate][element] if b != existing]
+                else:
+                    # Reject lower confidence contradictory belief
+                    return False
         
-        # Update statistics
-        self.stats['total_beliefs'] += 1
-        self.stats['updates'] += 1
+        # Add belief
+        self.beliefs[element].append(belief)
+        self.predicate_index[predicate][element].append(belief)
         
-        # Check for contradictions
-        self._check_contradiction(proposition, element)
-        
-        self.logger.debug(f"Added belief: {proposition} at {element} with weight {weight}")
-        
-        return record
+        return True
     
-    def query(self, proposition: str, element: Tuple[str, str], 
-              aggregation: str = 'max') -> float:
+    def get_beliefs(self, element: OSLElement, predicate: Optional[str] = None) -> List[Belief]:
         """
-        Query the belief strength for a proposition at a given element.
-        
-        Uses upward closure: belief at element e is supported by all records
-        at elements e' ≼ e in the lattice.
-        
-        Args:
-            proposition: The proposition to query
-            element: The (observer, situation) pair
-            aggregation: How to combine multiple records ('max', 'mean', 'weighted_mean')
-            
-        Returns:
-            Aggregated belief strength in [0,1]
+        Get beliefs for element, optionally filtered by predicate
         """
-        if element not in self.lattice.element_set:
-            raise ValueError(f"Element {element} not in lattice")
+        if element not in self.beliefs:
+            return []
         
-        self.stats['queries'] += 1
+        if predicate is None:
+            return self.beliefs[element].copy()
+        else:
+            return [b for b in self.beliefs[element] if b.predicate == predicate]
+    
+    def get_belief_value(self, element: OSLElement, predicate: str) -> Optional[Any]:
+        """
+        Get belief value for specific predicate at element
+        If multiple beliefs exist, returns the one with highest confidence
+        """
+        beliefs = self.get_beliefs(element, predicate)
+        if not beliefs:
+            return None
         
-        # Collect all supporting records from descendants
-        supporting_records = []
-        descendants = self.lattice.descendants(element)
-        
-        for desc_elem in descendants:
-            if proposition in self.beliefs:
-                records = self.beliefs[proposition].get(desc_elem, [])
-                supporting_records.extend(records)
-        
-        if not supporting_records:
+        # Return value of belief with highest confidence
+        best_belief = max(beliefs, key=lambda b: b.confidence)
+        return best_belief.value
+    
+    def get_belief_confidence(self, element: OSLElement, predicate: str) -> float:
+        """
+        Get belief confidence for specific predicate at element
+        """
+        beliefs = self.get_beliefs(element, predicate)
+        if not beliefs:
             return 0.0
         
-        # Aggregate the weights
-        if aggregation == 'max':
-            return max(record.weight for record in supporting_records)
-        elif aggregation == 'mean':
-            return sum(record.weight for record in supporting_records) / len(supporting_records)
-        elif aggregation == 'weighted_mean':
-            # Weight by recency (more recent = higher weight)
-            current_time = time.time()
-            total_weight = 0.0
-            total_mass = 0.0
-            
-            for record in supporting_records:
-                age = current_time - record.timestamp
-                time_weight = max(0.1, 1.0 / (1.0 + age / 3600.0))  # Decay over hours
-                total_weight += record.weight * time_weight
-                total_mass += time_weight
-            
-            return total_weight / total_mass if total_mass > 0 else 0.0
+        # Return confidence of belief with highest confidence
+        best_belief = max(beliefs, key=lambda b: b.confidence)
+        return best_belief.confidence
+    
+    def has_belief(self, element: OSLElement, predicate: str) -> bool:
+        """
+        Check if element has any belief about predicate
+        """
+        return len(self.get_beliefs(element, predicate)) > 0
+    
+    def remove_belief(self, element: OSLElement, predicate: str, value: Any = None) -> bool:
+        """
+        Remove belief(s) from element
+        If value is specified, only remove beliefs with that value
+        Returns True if any beliefs were removed
+        """
+        if element not in self.beliefs:
+            return False
+        
+        original_count = len(self.beliefs[element])
+        
+        if value is None:
+            # Remove all beliefs with this predicate
+            self.beliefs[element] = [b for b in self.beliefs[element] if b.predicate != predicate]
+            self.predicate_index[predicate][element] = []
         else:
-            raise ValueError(f"Unknown aggregation method: {aggregation}")
-    
-    def believes(self, element: Tuple[str, str], proposition: str) -> bool:
-        """
-        Check if the given element believes the proposition above threshold.
+            # Remove beliefs with specific predicate and value
+            self.beliefs[element] = [b for b in self.beliefs[element] 
+                                   if not (b.predicate == predicate and b.value == value)]
+            self.predicate_index[predicate][element] = [b for b in self.predicate_index[predicate][element]
+                                                       if b.value != value]
         
-        Args:
-            element: The (observer, situation) pair
-            proposition: The proposition to check
+        return len(self.beliefs[element]) < original_count
+    
+    def get_all_predicates(self) -> Set[str]:
+        """
+        Get all predicates that have beliefs in the belief base
+        """
+        predicates = set()
+        for element_beliefs in self.beliefs.values():
+            for belief in element_beliefs:
+                predicates.add(belief.predicate)
+        return predicates
+    
+    def get_elements_with_predicate(self, predicate: str) -> Set[OSLElement]:
+        """
+        Get all elements that have beliefs about the given predicate
+        """
+        return set(self.predicate_index[predicate].keys())
+    
+    def propagate_belief_up(self, element: OSLElement, predicate: str, 
+                           decay_factor: float = 0.9) -> int:
+        """
+        Propagate belief upward through lattice cone
+        Real belief propagation with confidence decay
+        Returns number of elements affected
+        """
+        if not self.has_belief(element, predicate):
+            return 0
+        
+        source_belief = max(self.get_beliefs(element, predicate), key=lambda b: b.confidence)
+        upper_cone = self.lattice.get_cone_up(element)
+        affected_count = 0
+        
+        for upper_element in upper_cone:
+            if upper_element == element:
+                continue
             
-        Returns:
-            True if belief strength >= threshold
-        """
-        strength = self.query(proposition, element)
-        return strength >= self.threshold
-    
-    def get_beliefs_at(self, element: Tuple[str, str]) -> Dict[str, float]:
-        """
-        Get all beliefs held at a specific element.
-        
-        Args:
-            element: The (observer, situation) pair
+            # Calculate propagated confidence with decay
+            propagated_confidence = source_belief.confidence * decay_factor
             
-        Returns:
-            Dictionary mapping propositions to belief strengths
-        """
-        beliefs = {}
-        propositions = self.element_index.get(element, set())
+            if propagated_confidence > 0.1:  # Only propagate if confidence is meaningful
+                # Check if we should update existing belief
+                existing_beliefs = self.get_beliefs(upper_element, predicate)
+                should_add = True
+                
+                for existing in existing_beliefs:
+                    if existing.value == source_belief.value:
+                        # Same value, update if higher confidence
+                        if propagated_confidence > existing.confidence:
+                            self.remove_belief(upper_element, predicate, existing.value)
+                        else:
+                            should_add = False
+                        break
+                    elif existing.is_contradictory(Belief(predicate, source_belief.value, propagated_confidence)):
+                        # Contradictory value, only add if much higher confidence
+                        if propagated_confidence > existing.confidence * 1.5:
+                            self.remove_belief(upper_element, predicate, existing.value)
+                        else:
+                            should_add = False
+                        break
+                
+                if should_add:
+                    self.add_belief(upper_element, predicate, source_belief.value, 
+                                  propagated_confidence, f"propagated_from_{element}")
+                    affected_count += 1
         
-        # Also check ancestors for inherited beliefs
-        ancestors = self.lattice.ancestors(element)
-        for ancestor in ancestors:
-            propositions.update(self.element_index.get(ancestor, set()))
-        
-        for prop in propositions:
-            strength = self.query(prop, element)
-            if strength > 0:
-                beliefs[prop] = strength
-        
-        return beliefs
+        return affected_count
     
-    def get_contradictions(self) -> List[Tuple[str, Tuple[str, str]]]:
+    def propagate_belief_down(self, element: OSLElement, predicate: str, 
+                             decay_factor: float = 0.9) -> int:
         """
-        Get all current contradictions in the belief base.
+        Propagate belief downward through lattice cone
+        Real belief propagation with confidence decay
+        Returns number of elements affected
+        """
+        if not self.has_belief(element, predicate):
+            return 0
         
-        Returns:
-            List of (proposition, element) pairs where contradictions exist
+        source_belief = max(self.get_beliefs(element, predicate), key=lambda b: b.confidence)
+        lower_cone = self.lattice.get_cone_down(element)
+        affected_count = 0
+        
+        for lower_element in lower_cone:
+            if lower_element == element:
+                continue
+            
+            # Calculate propagated confidence with decay
+            propagated_confidence = source_belief.confidence * decay_factor
+            
+            if propagated_confidence > 0.1:  # Only propagate if confidence is meaningful
+                # Check if we should update existing belief
+                existing_beliefs = self.get_beliefs(lower_element, predicate)
+                should_add = True
+                
+                for existing in existing_beliefs:
+                    if existing.value == source_belief.value:
+                        # Same value, update if higher confidence
+                        if propagated_confidence > existing.confidence:
+                            self.remove_belief(lower_element, predicate, existing.value)
+                        else:
+                            should_add = False
+                        break
+                    elif existing.is_contradictory(Belief(predicate, source_belief.value, propagated_confidence)):
+                        # Contradictory value, only add if much higher confidence
+                        if propagated_confidence > existing.confidence * 1.5:
+                            self.remove_belief(lower_element, predicate, existing.value)
+                        else:
+                            should_add = False
+                        break
+                
+                if should_add:
+                    self.add_belief(lower_element, predicate, source_belief.value, 
+                                  propagated_confidence, f"propagated_from_{element}")
+                    affected_count += 1
+        
+        return affected_count
+    
+    def detect_contradictions(self) -> List[Tuple[OSLElement, Belief, OSLElement, Belief]]:
+        """
+        Detect all contradictions in the belief base
+        Real contradiction detection algorithm
         """
         contradictions = []
         
-        for element in self.contradictions:
-            # Find which propositions are contradictory at this element
-            element_beliefs = self.get_beliefs_at(element)
+        # Check contradictions within same element
+        for element, element_beliefs in self.beliefs.items():
+            for i, belief1 in enumerate(element_beliefs):
+                for j, belief2 in enumerate(element_beliefs[i+1:], i+1):
+                    if belief1.is_contradictory(belief2):
+                        contradictions.append((element, belief1, element, belief2))
+        
+        # Check contradictions across related elements in lattice
+        for predicate in self.get_all_predicates():
+            elements_with_predicate = self.get_elements_with_predicate(predicate)
             
-            for prop in element_beliefs:
-                neg_prop = f"¬{prop}" if not prop.startswith("¬") else prop[1:]
+            for element1 in elements_with_predicate:
+                beliefs1 = self.get_beliefs(element1, predicate)
                 
-                if prop in element_beliefs and neg_prop in element_beliefs:
-                    if (element_beliefs[prop] >= self.threshold and 
-                        element_beliefs[neg_prop] >= self.threshold):
-                        contradictions.append((prop, element))
+                # Check against comparable elements
+                for element2 in elements_with_predicate:
+                    if element1 != element2 and element1.is_comparable(element2):
+                        beliefs2 = self.get_beliefs(element2, predicate)
+                        
+                        for belief1 in beliefs1:
+                            for belief2 in beliefs2:
+                                if belief1.is_contradictory(belief2):
+                                    contradictions.append((element1, belief1, element2, belief2))
         
         return contradictions
     
-    def _check_contradiction(self, proposition: str, element: Tuple[str, str]):
-        """Check if adding this belief creates a contradiction."""
-        # Check for negation
-        if proposition.startswith("¬"):
-            positive_prop = proposition[1:]
-            negative_prop = proposition
-        else:
-            positive_prop = proposition
-            negative_prop = f"¬{proposition}"
-        
-        # Check all ancestors for contradictory beliefs
-        ancestors = self.lattice.ancestors(element)
-        
-        for ancestor in ancestors:
-            pos_strength = self.query(positive_prop, ancestor)
-            neg_strength = self.query(negative_prop, ancestor)
-            
-            if pos_strength >= self.threshold and neg_strength >= self.threshold:
-                self.contradictions.add(ancestor)
-                self.stats['contradictions_detected'] += 1
-                self.logger.warning(f"Contradiction detected at {ancestor}: {positive_prop} vs {negative_prop}")
-    
-    def resolve_contradiction(self, proposition: str, element: Tuple[str, str], 
-                            resolution_strategy: str = 'latest') -> bool:
+    def resolve_contradictions(self, method: str = 'confidence') -> int:
         """
-        Attempt to resolve a contradiction using the specified strategy.
-        
-        Args:
-            proposition: The contradictory proposition
-            element: The element where contradiction occurs
-            resolution_strategy: 'latest', 'highest_weight', 'source_priority'
-            
-        Returns:
-            True if contradiction was resolved
+        Resolve contradictions in belief base using specified method
+        Real contradiction resolution algorithm
+        Returns number of contradictions resolved
         """
-        if proposition.startswith("¬"):
-            positive_prop = proposition[1:]
-            negative_prop = proposition
-        else:
-            positive_prop = proposition
-            negative_prop = f"¬{proposition}"
+        contradictions = self.detect_contradictions()
+        resolved_count = 0
         
-        # Get all records for both propositions
-        pos_records = []
-        neg_records = []
-        
-        descendants = self.lattice.descendants(element)
-        for desc_elem in descendants:
-            pos_records.extend(self.beliefs[positive_prop].get(desc_elem, []))
-            neg_records.extend(self.beliefs[negative_prop].get(desc_elem, []))
-        
-        if not pos_records or not neg_records:
-            return True  # No actual contradiction
-        
-        # Apply resolution strategy
-        if resolution_strategy == 'latest':
-            # Keep the most recent records, remove older ones
-            all_records = pos_records + neg_records
-            all_records.sort(key=lambda r: r.timestamp, reverse=True)
-            
-            # Keep records from the latest timestamp
-            latest_time = all_records[0].timestamp
-            keep_records = [r for r in all_records if r.timestamp == latest_time]
-            
-            # Remove older records
-            for record in all_records:
-                if record not in keep_records:
-                    self._remove_record(record)
-        
-        elif resolution_strategy == 'highest_weight':
-            # Keep records with highest weight
-            max_weight = max(max(r.weight for r in pos_records), 
-                           max(r.weight for r in neg_records))
-            
-            # Remove records with lower weight
-            for record in pos_records + neg_records:
-                if record.weight < max_weight:
-                    self._remove_record(record)
-        
-        # Check if contradiction is resolved
-        pos_strength = self.query(positive_prop, element)
-        neg_strength = self.query(negative_prop, element)
-        
-        resolved = not (pos_strength >= self.threshold and neg_strength >= self.threshold)
-        
-        if resolved:
-            self.contradictions.discard(element)
-            self.logger.info(f"Resolved contradiction at {element} for {proposition}")
-        
-        return resolved
-    
-    def _remove_record(self, record: BeliefRecord):
-        """Remove a specific record from the belief base."""
-        prop_beliefs = self.beliefs[record.proposition]
-        element_records = prop_beliefs[record.element]
-        
-        if record in element_records:
-            element_records.remove(record)
-            self.stats['total_beliefs'] -= 1
-            
-            # Clean up empty structures
-            if not element_records:
-                del prop_beliefs[record.element]
-                self.element_index[record.element].discard(record.proposition)
+        for elem1, belief1, elem2, belief2 in contradictions:
+            if method == 'confidence':
+                # Keep belief with higher confidence
+                if belief1.confidence > belief2.confidence:
+                    self.remove_belief(elem2, belief2.predicate, belief2.value)
+                elif belief2.confidence > belief1.confidence:
+                    self.remove_belief(elem1, belief1.predicate, belief1.value)
+                # If equal confidence, keep both (unresolved)
                 
-                if not self.element_index[record.element]:
-                    del self.element_index[record.element]
+            elif method == 'source_priority':
+                # Prioritize beliefs from certain sources
+                priority_sources = ['sensor', 'expert', 'user']
+                source1_priority = priority_sources.index(belief1.source) if belief1.source in priority_sources else len(priority_sources)
+                source2_priority = priority_sources.index(belief2.source) if belief2.source in priority_sources else len(priority_sources)
+                
+                if source1_priority < source2_priority:
+                    self.remove_belief(elem2, belief2.predicate, belief2.value)
+                elif source2_priority < source1_priority:
+                    self.remove_belief(elem1, belief1.predicate, belief1.value)
+                
+            elif method == 'temporal':
+                # Keep more recent belief (if timestamps available)
+                if belief1.timestamp and belief2.timestamp:
+                    if belief1.timestamp > belief2.timestamp:
+                        self.remove_belief(elem2, belief2.predicate, belief2.value)
+                    elif belief2.timestamp > belief1.timestamp:
+                        self.remove_belief(elem1, belief1.predicate, belief1.value)
             
-            if not prop_beliefs:
-                del self.beliefs[record.proposition]
-    
-    def clear(self):
-        """Clear all beliefs from the base."""
-        self.beliefs.clear()
-        self.element_index.clear()
-        self.contradictions.clear()
-        self.stats = {
-            'total_beliefs': 0,
-            'updates': 0,
-            'queries': 0,
-            'contradictions_detected': 0
-        }
+            resolved_count += 1
+        
+        return resolved_count
     
     def get_statistics(self) -> Dict[str, Any]:
-        """Get current statistics about the belief base."""
+        """
+        Get comprehensive statistics about the belief base
+        """
+        total_beliefs = sum(len(beliefs) for beliefs in self.beliefs.values())
+        total_elements_with_beliefs = len([elem for elem, beliefs in self.beliefs.items() if beliefs])
+        
+        # Confidence statistics
+        all_confidences = []
+        for element_beliefs in self.beliefs.values():
+            for belief in element_beliefs:
+                all_confidences.append(belief.confidence)
+        
+        confidence_stats = {}
+        if all_confidences:
+            confidence_stats = {
+                'mean': np.mean(all_confidences),
+                'std': np.std(all_confidences),
+                'min': np.min(all_confidences),
+                'max': np.max(all_confidences),
+                'median': np.median(all_confidences)
+            }
+        
+        # Predicate statistics
+        predicate_counts = defaultdict(int)
+        for element_beliefs in self.beliefs.values():
+            for belief in element_beliefs:
+                predicate_counts[belief.predicate] += 1
+        
         return {
-            **self.stats,
-            'unique_propositions': len(self.beliefs),
-            'active_elements': len(self.element_index),
-            'contradictions': len(self.contradictions),
+            'total_beliefs': total_beliefs,
+            'total_elements_with_beliefs': total_elements_with_beliefs,
+            'total_predicates': len(self.get_all_predicates()),
+            'confidence_statistics': confidence_stats,
+            'predicate_distribution': dict(predicate_counts),
+            'contradiction_count': len(self.detect_contradictions()),
             'lattice_size': self.lattice.size()
         }
     
-    def __len__(self) -> int:
-        """Return the total number of belief records."""
-        return self.stats['total_beliefs']
+    def size(self) -> int:
+        """Get total number of beliefs in the belief base"""
+        return sum(len(beliefs) for beliefs in self.beliefs.values())
     
-    def __str__(self) -> str:
-        """String representation of the belief base."""
-        return f"BeliefBase({self.stats['total_beliefs']} beliefs, {len(self.contradictions)} contradictions)"
+    def clear(self):
+        """Clear all beliefs from the belief base"""
+        self.beliefs.clear()
+        self.predicate_index.clear()
+        self.contradictions.clear()
 

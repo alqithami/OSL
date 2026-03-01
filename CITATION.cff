@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "OSL — Observer–Situation Lattice"
+authors:
+  - family-names: "Alqithami"
+    given-names: "Saad"
+    email: "salqithami@bu.edu.sa"
+version: "1.0.0"
+date-released: "2026-03-01"
+license: "MIT"
+doi: "10.65109/CHZG9392"
+url: "https://github.com/alqithami/OSL"
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: "Alqithami"
+      given-names: "Saad"
+  title: "The Observer–Situation Lattice: A Unified Formal Basis for Perspective-Aware Cognition"
+  year: 2026
+  conference:
+    name: "25th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2026)"
+    location: "Paphos, Cyprus"
+  doi: "10.65109/CHZG9392"

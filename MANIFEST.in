@@ -1,0 +1,15 @@
+include README.md
+include LICENSE
+include requirements.txt
+include requirements-dev.txt
+include pyproject.toml
+include MANIFEST.in
+
+recursive-include src *.py
+recursive-include tests *.py
+recursive-include experiments *.py
+recursive-include .github *.yml *.yaml
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store

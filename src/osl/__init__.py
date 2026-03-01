@@ -1,24 +1,27 @@
 """
-Observer-Situation Lattice (OSL) - Honest Implementation
+OSL — Observer–Situation Lattice
 
-A scientifically rigorous implementation of the OSL framework for perspective-aware cognition.
+Reference implementation accompanying:
+
+Saad Alqithami. 2026. *The Observer–Situation Lattice: A Unified Formal Basis for
+Perspective-Aware Cognition*. Proc. of AAMAS 2026. DOI: 10.65109/CHZG9392
 """
 
-from .lattice import OSLattice
-from .belief_base import BeliefBase
+from .core import OSLElement, OSLattice, create_powerset_lattice, create_chain_lattice
+from .belief_base import Belief, BeliefBase
 from .algorithms import RBPAlgorithm, MCCAlgorithm
-from .reasoning import TheoryOfMindReasoner
-from .explanation import ExplanationGenerator
-
-__version__ = "1.0.0"
-__author__ = "OSL Research Team"
+from .baselines import ATMSBaseline, DTMSBaseline, MEPKBaseline
 
 __all__ = [
-    'OSLattice',
-    'BeliefBase', 
-    'RBPAlgorithm',
-    'MCCAlgorithm',
-    'TheoryOfMindReasoner',
-    'ExplanationGenerator'
+    "OSLElement",
+    "OSLattice",
+    "create_powerset_lattice",
+    "create_chain_lattice",
+    "Belief",
+    "BeliefBase",
+    "RBPAlgorithm",
+    "MCCAlgorithm",
+    "ATMSBaseline",
+    "DTMSBaseline",
+    "MEPKBaseline",
 ]
-

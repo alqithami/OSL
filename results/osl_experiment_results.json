@@ -1,0 +1,512 @@
+{
+  "scalability": {
+    "sizes": [
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "osl_runtimes": [
+      [
+        0.0010612010955810547,
+        0.0009150505065917969,
+        0.0008690357208251953,
+        0.001007080078125,
+        0.0009372234344482422
+      ],
+      [
+        0.0016448497772216797,
+        0.0018169879913330078,
+        0.0017070770263671875,
+        0.0015990734100341797,
+        0.0013191699981689453
+      ],
+      [
+        0.0032057762145996094,
+        0.003281831741333008,
+        0.0045049190521240234,
+        0.005572080612182617,
+        0.002948760986328125
+      ],
+      [
+        0.01311492919921875,
+        0.013117074966430664,
+        0.013459920883178711,
+        0.013490915298461914,
+        0.012792110443115234
+      ],
+      [
+        0.037719011306762695,
+        0.03700089454650879,
+        0.03579998016357422,
+        0.028429031372070312,
+        0.03516101837158203
+      ]
+    ],
+    "osl_memory": [
+      [
+        0.0625,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.1875,
+        0.0
+      ],
+      [
+        0.0625,
+        0.03125,
+        0.046875,
+        0.09375,
+        0.046875
+      ],
+      [
+        0.4375,
+        0.0,
+        0.203125,
+        0.203125,
+        0.015625
+      ]
+    ],
+    "rbp_iterations": [
+      [
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      [
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      [
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      [
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      [
+        20,
+        20,
+        20,
+        7,
+        20
+      ]
+    ],
+    "affected_elements": [
+      [
+        3,
+        4,
+        4,
+        3,
+        4
+      ],
+      [
+        7,
+        7,
+        7,
+        8,
+        8
+      ],
+      [
+        15,
+        15,
+        15,
+        16,
+        16
+      ],
+      [
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      [
+        64,
+        64,
+        64,
+        64,
+        64
+      ]
+    ],
+    "matrix_operations": [
+      [
+        400,
+        320,
+        320,
+        400,
+        400
+      ],
+      [
+        800,
+        800,
+        800,
+        800,
+        640
+      ],
+      [
+        1600,
+        1600,
+        1600,
+        1600,
+        1600
+      ],
+      [
+        3200,
+        3200,
+        3200,
+        3200,
+        3200
+      ],
+      [
+        6400,
+        6400,
+        6400,
+        2240,
+        6400
+      ]
+    ],
+    "trials_per_size": 5,
+    "complexity_exponent": 1.3396118248398123,
+    "r_squared": 0.9829791711294439,
+    "avg_runtimes": [
+      0.0009579181671142579,
+      0.001617431640625,
+      0.0039026737213134766,
+      0.013194990158081055,
+      0.03482198715209961
+    ]
+  },
+  "baseline_comparison": {
+    "baselines": [
+      "OSL",
+      "ATMS",
+      "DTMS",
+      "MEPK"
+    ],
+    "runtimes": {
+      "OSL": [
+        0.006586790084838867,
+        0.007045269012451172,
+        0.006862163543701172,
+        0.006675004959106445,
+        0.007173776626586914
+      ],
+      "ATMS": [
+        0.011691093444824219,
+        0.012028217315673828,
+        0.010937929153442383,
+        0.010653972625732422,
+        0.01294088363647461
+      ],
+      "DTMS": [
+        0.005015134811401367,
+        0.005468845367431641,
+        0.005178928375244141,
+        0.005028247833251953,
+        0.006012916564941406
+      ],
+      "MEPK": [
+        0.06519699096679688,
+        0.059597015380859375,
+        0.0571439266204834,
+        0.0729978084564209,
+        0.08366894721984863
+      ]
+    },
+    "memory_usage": {
+      "OSL": [
+        0.0,
+        0.109375,
+        0.0625,
+        0.109375,
+        0.03125
+      ],
+      "ATMS": [
+        1.015625,
+        0.609375,
+        0.0625,
+        0.0625,
+        0.0625
+      ],
+      "DTMS": [
+        0.234375,
+        0.0,
+        0.0,
+        0.0625,
+        0.140625
+      ],
+      "MEPK": [
+        1.8125,
+        0.0625,
+        0.0625,
+        0.078125,
+        0.09375
+      ]
+    },
+    "processing_metrics": {
+      "OSL": [
+        {
+          "iterations": 15,
+          "affected_elements": 24,
+          "contradictions": 377
+        },
+        {
+          "iterations": 15,
+          "affected_elements": 24,
+          "contradictions": 423
+        },
+        {
+          "iterations": 15,
+          "affected_elements": 24,
+          "contradictions": 449
+        },
+        {
+          "iterations": 15,
+          "affected_elements": 24,
+          "contradictions": 554
+        },
+        {
+          "iterations": 15,
+          "affected_elements": 24,
+          "contradictions": 438
+        }
+      ],
+      "ATMS": [
+        {
+          "assumptions": 149,
+          "justifications": 1746,
+          "labels": 1260
+        },
+        {
+          "assumptions": 155,
+          "justifications": 1871,
+          "labels": 1241
+        },
+        {
+          "assumptions": 150,
+          "justifications": 1716,
+          "labels": 1185
+        },
+        {
+          "assumptions": 150,
+          "justifications": 1636,
+          "labels": 1093
+        },
+        {
+          "assumptions": 168,
+          "justifications": 2248,
+          "labels": 1223
+        }
+      ],
+      "DTMS": [
+        {
+          "nodes": 149,
+          "dependencies": 1746,
+          "believed_nodes": 123
+        },
+        {
+          "nodes": 155,
+          "dependencies": 1871,
+          "believed_nodes": 123
+        },
+        {
+          "nodes": 150,
+          "dependencies": 1716,
+          "believed_nodes": 122
+        },
+        {
+          "nodes": 150,
+          "dependencies": 1636,
+          "believed_nodes": 122
+        },
+        {
+          "nodes": 168,
+          "dependencies": 2248,
+          "believed_nodes": 122
+        }
+      ],
+      "MEPK": [
+        {
+          "variables": 120,
+          "constraints": 1529,
+          "converged": true
+        },
+        {
+          "variables": 120,
+          "constraints": 1535,
+          "converged": true
+        },
+        {
+          "variables": 120,
+          "constraints": 1530,
+          "converged": true
+        },
+        {
+          "variables": 120,
+          "constraints": 1530,
+          "converged": true
+        },
+        {
+          "variables": 120,
+          "constraints": 1548,
+          "converged": true
+        }
+      ]
+    },
+    "lattice_size": 24,
+    "trials": 5,
+    "OSL_avg_runtime": 0.006868600845336914,
+    "OSL_std_runtime": 0.00021967339824533003,
+    "OSL_avg_memory": 0.0625,
+    "OSL_processing_rate": 3494.1614078933667,
+    "ATMS_avg_runtime": 0.011650419235229493,
+    "ATMS_std_runtime": 0.0008136623518410703,
+    "ATMS_avg_memory": 0.3625,
+    "ATMS_processing_rate": 2060.01170562402,
+    "DTMS_avg_runtime": 0.0053408145904541016,
+    "DTMS_std_runtime": 0.0003736536864075922,
+    "DTMS_avg_memory": 0.0875,
+    "DTMS_processing_rate": 4493.696531404848,
+    "MEPK_avg_runtime": 0.06772093772888184,
+    "MEPK_std_runtime": 0.009658425927249715,
+    "MEPK_avg_memory": 0.421875,
+    "MEPK_processing_rate": 354.3955651660211
+  },
+  "ablation_study": {
+    "configurations": [
+      "OSL_Full",
+      "OSL_No_MCC",
+      "OSL_Limited_RBP",
+      "OSL_No_Propagation",
+      "OSL_Minimal"
+    ],
+    "runtimes": {
+      "OSL_Full": 0.007604837417602539,
+      "OSL_No_MCC": 0.0050640106201171875,
+      "OSL_Limited_RBP": 0.004391193389892578,
+      "OSL_No_Propagation": 0.0010120868682861328,
+      "OSL_Minimal": 9.5367431640625e-07
+    },
+    "accuracy_metrics": {
+      "OSL_Full": {
+        "belief_consistency": -5.492957746478873,
+        "propagation_coverage": 1.0,
+        "convergence_achieved": false
+      },
+      "OSL_No_MCC": {
+        "belief_consistency": -5.492957746478873,
+        "propagation_coverage": 1.0,
+        "convergence_achieved": false
+      },
+      "OSL_Limited_RBP": {
+        "belief_consistency": -5.492957746478873,
+        "propagation_coverage": 1.0,
+        "convergence_achieved": false
+      },
+      "OSL_No_Propagation": {
+        "belief_consistency": -6.888888888888889,
+        "propagation_coverage": 0.0,
+        "convergence_achieved": true
+      },
+      "OSL_Minimal": {
+        "belief_consistency": -6.888888888888889,
+        "propagation_coverage": 0.0,
+        "convergence_achieved": true
+      }
+    },
+    "completeness_metrics": {
+      "OSL_Full": {
+        "beliefs_processed": 142,
+        "elements_covered": 24,
+        "predicates_covered": 5
+      },
+      "OSL_No_MCC": {
+        "beliefs_processed": 142,
+        "elements_covered": 24,
+        "predicates_covered": 5
+      },
+      "OSL_Limited_RBP": {
+        "beliefs_processed": 142,
+        "elements_covered": 24,
+        "predicates_covered": 5
+      },
+      "OSL_No_Propagation": {
+        "beliefs_processed": 72,
+        "elements_covered": 24,
+        "predicates_covered": 5
+      },
+      "OSL_Minimal": {
+        "beliefs_processed": 72,
+        "elements_covered": 24,
+        "predicates_covered": 5
+      }
+    }
+  },
+  "correctness_validation": {
+    "theory_of_mind": {
+      "runtime": 0.0002300739288330078,
+      "correctness": true,
+      "sally_belief": "basket",
+      "anne_belief": "box",
+      "actual_location": "box",
+      "propagation_steps": 10
+    },
+    "contradiction_handling": {
+      "runtime": 1.4781951904296875e-05,
+      "contradictions_detected": 0,
+      "contradictions_resolved": 0,
+      "final_beliefs": 3,
+      "resolution_success": false
+    },
+    "lattice_properties": {
+      "Chain_4": {
+        "is_partial_order": true,
+        "height": 4,
+        "width": 1,
+        "size": 4,
+        "errors": 0
+      },
+      "Antichain_3": {
+        "is_partial_order": true,
+        "height": 1,
+        "width": 3,
+        "size": 3,
+        "errors": 0
+      },
+      "Powerset_2x2": {
+        "is_partial_order": true,
+        "height": 5,
+        "width": 6,
+        "size": 16,
+        "errors": 0
+      }
+    }
+  }
+}

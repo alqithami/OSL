@@ -1,0 +1,87 @@
+{
+  "generated_at_unix": 1772399573.8732178,
+  "results": [
+    {
+      "scenario": "Sally\u2013Anne (basic)",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 1.0,
+      "runtime_ms": 1.681887999893661,
+      "details": {
+        "sally_ball_location": "basket",
+        "anne_ball_location": "box",
+        "actual_location": "box"
+      }
+    },
+    {
+      "scenario": "Sally\u2013Anne with distractor",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 1.0,
+      "runtime_ms": 1.9565329998840753,
+      "details": {
+        "sally_ball_location": "basket",
+        "distractor": "drawer"
+      }
+    },
+    {
+      "scenario": "Nested belief (Level 2)",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 0.95,
+      "runtime_ms": 1.1316360000819259,
+      "details": {
+        "sally_nested_belief": "box",
+        "anne_first_order": "box"
+      }
+    },
+    {
+      "scenario": "Multiple objects",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 1.0,
+      "runtime_ms": 2.346998000120948,
+      "details": {
+        "sally_ball": "basket",
+        "sally_key": "drawer"
+      }
+    },
+    {
+      "scenario": "Temporal belief change",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 0.975,
+      "runtime_ms": 0.7387760001620336,
+      "details": {
+        "sally_t1_ball_location": "box"
+      }
+    },
+    {
+      "scenario": "False photograph",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 1.0,
+      "runtime_ms": 0.7341329996961576,
+      "details": {
+        "sally_ball_location": "basket"
+      }
+    },
+    {
+      "scenario": "Appearance\u2013reality",
+      "osl_result": "PASS",
+      "expected": "PASS",
+      "confidence": 0.925,
+      "runtime_ms": 0.689884000166785,
+      "details": {
+        "sally_appearance": "rock",
+        "reality": "sponge"
+      }
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "passed": 7,
+    "failed": 0,
+    "avg_runtime_ms": 1.3256925714293695
+  }
+}

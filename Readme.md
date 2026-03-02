@@ -1,6 +1,6 @@
 # Observer-Situation Lattice (OSL)
 
-[![Banner](https://files.manuscdn.com/user_upload_by_module/session_file/310419663031252385/cXRrENjPfxNiwiRj.png)](https://www.youtube.com/watch?v=i7lw2pWrPQA)
+[![Banner](https://github.com/user-attachments/assets/770f1aba-18da-4a8d-8e87-fd2d80e5578e)](https://www.youtube.com/watch?v=i7lw2pWrPQA)
 
 **OSL** is a Python reference implementation of the **Observer-Situation Lattice**, a formal mathematical structure for unifying perspective-aware cognition in multi-agent systems. This repository contains the full source code, experimental artifacts, and reproducibility scripts for the AAMAS 2026 paper:
 
@@ -17,7 +17,7 @@
 
 In complex multi-agent environments, autonomous agents often develop conflicting beliefs due to their unique perspectives. The Observer-Situation Lattice (OSL) provides a unified mathematical framework to manage these divergent viewpoints. It enables agents to represent, propagate, and reconcile beliefs, leading to globally consistent and coordinated behavior.
 
-![Graphical Abstract](https://files.manuscdn.com/user_upload_by_module/session_file/310419663031252385/CPybviCcevyJarXM.png)
+![Graphical Abstract](https://github.com/user-attachments/assets/0cea6eeb-3f8d-4ca1-9bfc-d8f15435234d)
 
 Key capabilities of the OSL framework include:
 

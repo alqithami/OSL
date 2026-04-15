@@ -1,4 +1,7 @@
 # Observer-Situation Lattice (OSL)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![arXiv](https://img.shields.io/badge/arXiv-2603.01407-b31b1b.svg)](https://arxiv.org/abs/2603.01407)
 
 [![Banner](https://github.com/user-attachments/assets/770f1aba-18da-4a8d-8e87-fd2d80e5578e)](https://www.youtube.com/watch?v=i7lw2pWrPQA)
 
